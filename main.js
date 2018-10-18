@@ -56,8 +56,8 @@ class Philosopher {
 
         const iframe = this.iframe = document.createElement('iframe');
         iframe.src = `/philosopher.html?id=${id}&left=${left}&right=${right}&color=${encodeURIComponent(circleColor(position))}`;
-        iframe.width = '160';
-        iframe.height = '160';
+        iframe.width = String(PHILOSOPHER_SIZE);
+        iframe.height = String(PHILOSOPHER_SIZE);
 
         // calculate position of philosopher.
 
