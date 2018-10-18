@@ -39,11 +39,23 @@ class StrategyBase {
  * Strategy which first acuires left fork and then right fork
  */
  export class LeftRightStrategy extends StrategyBase {
+     constructor(options) {
+         super(options);
+         /**
+          * Whether to wait for randm duration at the beginning.
+          */
+         this.waitOnInit = !!options.waitOnInit;
+     }
     async run() {
         const {
             left,
             right,
+            waitOnInit,
         } = this;
+        // if waitOnInit flag is set, wait before running.
+        if (waitOnInit) {
+            await randomSleep();
+        }
         while (true) {
             // First, acquire left fork.
             const leftForkLock = await this.getFork(left);

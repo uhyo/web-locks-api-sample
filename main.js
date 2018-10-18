@@ -32,6 +32,18 @@ class Philosopher {
          * ID of right fork.
          */
         this.right = (id - 1 + total) % total;
+        /**
+         * Reference to the iframe for this philosopher.
+         */
+        this.iframe = null;
+        /**
+         * Whether this philosopher is ready.
+         */
+        this.raedy = false;
+        /**
+         * Function to call when this philosopher is ready.
+         */
+        this.readyCallback = null;
     }
     /**
      * Place Philosopher's page on this page.
@@ -42,8 +54,8 @@ class Philosopher {
         // position of philosopher in [0, 1).
         const position = id / total;
 
-        const iframe = document.createElement('iframe');
-        iframe.src = `/philosopher.html?left=${left}&right=${right}&color=${encodeURIComponent(circleColor(position))}`;
+        const iframe = this.iframe = document.createElement('iframe');
+        iframe.src = `/philosopher.html?id=${id}&left=${left}&right=${right}&color=${encodeURIComponent(circleColor(position))}`;
         iframe.width = '160';
         iframe.height = '160';
 
@@ -59,6 +71,34 @@ class Philosopher {
             border: 'none',
         });
         document.body.append(iframe);
+    }
+    ready() {
+        this.ready = true;
+        if (this.readyCallback != null) {
+            this.readyCallback();
+        }
+        this.readyCallback = null;
+    }
+    /**
+     * Returns a Promise resolved when this philosopher is ready.
+     * TODO: do not call this function twice!
+     */
+    whenReady() {
+        if (this.ready) {
+            return Promise.resolve();
+        }
+        return new Promise(resolve => {
+            this.readyCallback = resolve;
+        });
+    }
+    /**
+     * Post messgae to underlying page.
+     */
+    postMessage(message) {
+        if (this.iframe == null) {
+            throw new Error('underlying iframe is not placed yet');
+        }
+        this.iframe.contentWindow.postMessage(message, location.origin);
     }
 }
 
@@ -137,11 +177,39 @@ export function init() {
     });
     // listen for message from philosophers.
     window.addEventListener('message', e => {
-        const {forkId, owner} = e.data;
-        if ('number' !== typeof forkId) {
-            return;
+        const {data} = e;
+        switch (data.type) {
+            case 'ready': {
+                // philosopher page is ready.
+                phils[data.id].ready();
+                break;
+            }
+            case 'fork': {
+                // fork's owner is set.
+                const { forkId, owner } = data;
+                if ('number' !== typeof forkId) {
+                    return;
+                }
+                const fork = forks[forkId];
+                fork.setOwner(owner);
+            }
         }
-        const fork = forks[forkId];
-        fork.setOwner(owner);
     });
+    // set up the control form.
+    const startButton = document.querySelector('#start-button');
+    // enable the start button when all philosophers are ready.
+    Promise.all(phils.map(p => p.whenReady())).then(()=> {
+        startButton.disabled = false;
+    });
+    startButton.addEventListener('click', e=> {
+        // send request to start to all philosophers.
+        phils.forEach(p=> {
+            p.postMessage({
+                type: 'start',
+                strategy: document.querySelector('#strategy').value,
+            });
+        });
+        
+        startButton.disabled = true;
+    })
 }

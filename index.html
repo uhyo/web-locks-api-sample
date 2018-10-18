@@ -3,10 +3,22 @@
   <head>
     <meta charset="UTF-8">
     <title>食事する哲学者の問題のサンプル</title>
+    <link rel="modulepreload" href="./main.js">
+    <link rel="modulepreload" href="./params.js">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/solid.css" integrity="sha384-osqezT+30O6N/vsMqwW8Ch6wKlMofqueuia2H7fePy42uC05rm1G+BUPSd2iBSJL" crossorigin="anonymous">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/fontawesome.css" integrity="sha384-BzCy2fixOYd0HObpx3GMefNqdbA7Qjcc91RgYeDjrHTIEXqiF00jKvgQG0+zY/7I" crossorigin="anonymous">
   </head>
   <body>
+    <form>
+      <p>
+        戦略：
+        <select id="strategy">
+          <option value="left-right">左→右</option>
+          <option value="left-right-wait">左→右（開始時に少し待つ）</option>
+        </select>
+      </p>
+      <p><button type="button" id="start-button" disabled>開始</button></p>
+    </form>
     <script type="module">
       import {init} from './main.js';
       init();

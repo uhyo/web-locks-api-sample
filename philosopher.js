@@ -10,6 +10,7 @@ export function init() {
     const icon = document.querySelector('#icon');
     const params = new URLSearchParams(location.search);
 
+    const id = Number.parseInt(params.get('id'));
     const color = params.get('color');
 
     Object.assign(icon.style, {
@@ -17,25 +18,63 @@ export function init() {
         color,
     });
 
-    // initialize a strategy for this philosopher.
-    const strat = new LeftRightStrategy({
-        left: Number.parseInt(params.get('left')),
-        right: Number.parseInt(params.get('right')),
-        reportFork: (forkId, occupied) => {
-            const owner = occupied ? {
-                color,
-            } : null;
-            reportForkState(forkId, owner);
-        },
-    })
+    // listen to message from parent.
+    window.addEventListener('message', e=> {
+        const {data} = e;
+        if (data.type === 'start') {
+            // start running.
 
-    strat.run();
+            // initialize a strategy for this philosopher.
+            const strat = makeStrategy(data.strategy, {
+                left: Number.parseInt(params.get('left')),
+                right: Number.parseInt(params.get('right')),
+                reportFork: (forkId, occupied) => {
+                    const owner = occupied ? {
+                        color,
+                    } : null;
+                    reportForkState(forkId, owner);
+                },
+            });
+
+            strat.run();
+        }
+    });
+    // tell the parent that this page is ready.true
+    sendToParent({
+        type: 'ready',
+        id,
+    });
+}
+
+/**
+ * Make given type of strategy.
+ */
+function makeStrategy(strategyName, options) {
+    switch (strategyName) {
+        case 'left-right': {
+            return new LeftRightStrategy(options);
+        }
+        case 'left-right-wait': {
+            return new LeftRightStrategy({
+                ...options,
+                waitOnInit: true,
+            });
+        }
+    }
 }
 
 function reportForkState(forkId, owner) {
     // report to the parent page that a fork is occupied.
-    window.parent.postMessage({
+    sendToParent({
+        type: 'fork',
         forkId,
         owner,
-    }, location.origin);
+    });
+}
+
+/**
+ * Wrapper of window.parent.postMessage() to send message to the parent.
+ */
+function sendToParent(message) {
+    window.parent.postMessage(message, location.origin);
 }
