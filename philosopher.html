@@ -14,10 +14,16 @@
           margin: 0;
           padding: 0;
       }
+      .icon-wrapper {
+          margin: auto;
+          width: min-content;
+      }
     </style>
   </head>
   <body>
-    <i id="icon" class="fas fa-user-tie" style="color:transparent"></i>
+    <div class="icon-wrapper">
+      <i id="icon" class="fas fa-user-tie" style="color:transparent"></i>
+    </div>
     <script type="module">
       import {init} from './philosopher.js';
       init();

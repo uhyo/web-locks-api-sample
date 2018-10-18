@@ -31,6 +31,7 @@ export function init() {
                 right: Number.parseInt(params.get('right')),
                 reportFork: (forkId, occupied) => {
                     const owner = occupied ? {
+                        id,
                         color,
                     } : null;
                     reportForkState(forkId, owner);

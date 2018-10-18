@@ -54,23 +54,39 @@ class Philosopher {
         // position of philosopher in [0, 1).
         const position = id / total;
 
+        const container = document.createElement('div');
+
+        // color of this philosopher
+        const color = circleColor(position);
+
         const iframe = this.iframe = document.createElement('iframe');
-        iframe.src = `/philosopher.html?id=${id}&left=${left}&right=${right}&color=${encodeURIComponent(circleColor(position))}`;
+        iframe.src = `/philosopher.html?id=${id}&left=${left}&right=${right}&color=${encodeURIComponent(color)}`;
         iframe.width = String(PHILOSOPHER_SIZE);
         iframe.height = String(PHILOSOPHER_SIZE);
+        iframe.style.border = 'none';
 
         // calculate position of philosopher.
 
         const {x, y} = circlePosition(CIRCLE_R, position);
         const offset = PHILOSOPHER_SIZE / 2;
 
-        Object.assign(iframe.style, {
+        Object.assign(container.style, {
             position: 'absolute',
             left: `calc(50vw + ${x - offset}px)`,
             top: `calc(50vh + ${y - offset}px)`,
-            border: 'none',
         });
-        document.body.append(iframe);
+
+        const nametag = document.createElement('p');
+        Object.assign(nametag.style, {
+            fontSize: '1.2rem',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            color,
+        });
+        nametag.append(`ID: ${id}`);
+
+        container.append(iframe, nametag);
+        document.body.append(container);
     }
     ready() {
         this.ready = true;
@@ -119,28 +135,48 @@ class Fork {
     }
     place() {
         const {id, total} = this;
-        const i = this.icon = document.createElement('i');
+
+        const wrapper = this.wrapper = document.createElement('div');
+
+        const i = document.createElement('i');
         i.className = 'fas fa-utensils';
+        i.style.fontSize = `${FORK_SIZE}px`;
 
         const position = (id + 0.5) / total;
         const offset = FORK_SIZE / 2;
         const {x, y} = circlePosition(CIRCLE_R, position);
-        Object.assign(i.style, {
+        Object.assign(wrapper.style, {
             position: 'absolute',
             left: `calc(50vw + ${x - offset}px)`,
             top: `calc(50vh + ${y - offset}px)`,
-            fontSize: `${FORK_SIZE}px`,
+            width: 'min-content',
+            margin: 'auto',
         });
         this.setColor();
-        document.body.append(i);
+
+        const label = this.label = document.createElement('p');
+        Object.assign(label.style, {
+            margin: '0.2em 0',
+            textAlign: 'center',
+            fontSize: '1.1rem',
+            fontWeight: 'bold',
+        });
+
+        wrapper.append(i, label);
+        document.body.append(wrapper);
     }
     setColor() {
         const {owner} = this;
-        this.icon.style.color = owner == null ? '#aaaaaa' : owner.color;
+        this.wrapper.style.color = owner == null ? '#aaaaaa' : owner.color;
+    }
+    setLabel() {
+        const {owner} = this;
+        this.label.textContent = owner == null ? '' : String(owner.id);
     }
     setOwner(owner) {
         this.owner = owner;
         this.setColor();
+        this.setLabel();
     }
 }
 
@@ -153,7 +189,7 @@ function circlePosition(radius, position) {
     };
 }
 function circleColor(position) {
-    return `hsl(${position}turn, 80%, 60%)`;
+    return `hsl(${position}turn, 80%, 50%)`;
 }
 
 export function init() {
