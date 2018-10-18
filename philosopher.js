@@ -3,6 +3,7 @@ import {
 } from './params.js';
 import {
     LeftRightStrategy,
+    OrderingStrategy,
 } from './strategy.js';
 
 export function init() {
@@ -59,6 +60,9 @@ function makeStrategy(strategyName, options) {
                 ...options,
                 waitOnInit: true,
             });
+        }
+        case 'ordering': {
+            return new OrderingStrategy(options);
         }
     }
 }

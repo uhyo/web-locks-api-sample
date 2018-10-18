@@ -72,6 +72,35 @@ class StrategyBase {
     }
  }
 
+ /**
+  * Strategy which acquires forks with smaller id.
+  */
+ export class OrderingStrategy extends StrategyBase {
+    async run() {
+        const {
+            left,
+            right,
+            waitOnInit,
+        } = this;
+        // reorder two forks.
+        const first = Math.min(left, right);
+        const last = Math.max(left, right);
+        while (true) {
+            // First, acquire fork with smaller id..
+            const firstForkLock = await this.getFork(first);
+            // Then, acquire the other fork.
+            const lastForkLock = await this.getFork(last);
+            // Use forks for some time.
+            await randomSleep();
+            // release forks.
+            this.releaseFork(last, lastForkLock);
+            this.releaseFork(first, firstForkLock);
+            // have interval.
+            await randomSleep();
+        }
+    }
+ }
+
  function lockName(id) {
      return LOCK_PREFIX + id;
  }
