@@ -60,7 +60,7 @@ class Philosopher {
         const color = circleColor(position);
 
         const iframe = this.iframe = document.createElement('iframe');
-        iframe.src = `/philosopher.html?id=${id}&left=${left}&right=${right}&color=${encodeURIComponent(color)}`;
+        iframe.src = `./philosopher.html?id=${id}&left=${left}&right=${right}&color=${encodeURIComponent(color)}`;
         iframe.width = String(PHILOSOPHER_SIZE);
         iframe.height = String(PHILOSOPHER_SIZE);
         iframe.style.border = 'none';
